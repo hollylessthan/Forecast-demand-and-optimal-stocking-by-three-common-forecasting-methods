@@ -1,0 +1,1 @@
+# Forecast-demand-and-optimal-stocking-by-three-common-forecasting-methods

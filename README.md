@@ -1,4 +1,4 @@
-# SupplyChain-Demand-Forecasting-by-Three-Forecasting-Methods
+# Demand-Forecasting-by-Three-Forecasting-Methods
 
 This is a course project from the Supply Chain Analytics course at UCSD, and the data set is obtained from the course as well.
 The goal of this project is to use common forecasting methods to find optimal stocking level and optimal profit.

@@ -14,9 +14,7 @@ library(ggplot2)
 #-------------------------#
 # Load data
 #-------------------------#
-#It is the weeklydemand for the eggs. 
-#You can also download Excel file, which contains the same data. 
-dm <- readr::read_csv("demand_data_session2.txt")
+dm <- readr::read_csv("demand_data.txt")
 
 # Add time trend
 dm <- dm %>%
@@ -43,15 +41,14 @@ dm %>%
 #-------------------------#
 # Setting
 #-------------------------#
-#As we discussed in class, the price is $4, the unit cost is $0.80, and the salvage value is $0. 
-#You will use the Holt’s model to forecast.
+#The price is $4, the unit cost is $0.80, and the salvage value is $0. 
 price <- 4
 cost <- 0.8
 salvage <- 0
 
 # What we know
-(price - cost) / (price - salvage) # target service level
-optimal_order_quantity <- as.integer(quantile(dm$demand, 0.8))
+sl<-(price - cost) / (price - salvage) # target service level
+optimal_order_quantity <- as.integer(quantile(dm$demand, sl))
 
 # Splitting the sample
 dm1 <- dm[1:100,]
@@ -221,8 +218,7 @@ res_table$AvgProf[2] <- mean(price * pmin(stocking_301_500, dm3$demand) + salvag
 
 #-------------------------#
 # method 2. simple exponential smoothing
-# It is slightly from the Excel file in the initialization part
-# It starts from week 101; while Excel starts from week 2
+# It starts from week 101
 #-------------------------#
 # start from arbitrary number
 alpha = 0.2
@@ -281,7 +277,7 @@ res <- optim(0.2, mse_simple_exponential_smoothing, method = "L-BFGS-B",
              lower = c(0),
              upper = c(1))
 ## Note: bisection might be more appropriate here (https://urldefense.com/v3/__https://rpubs.com/aaronsc32/bisection-method-r__;!!Mih3wA!WKo4McW-7-dzrHSo51O5DuRNZsZC4YkYFqeXfDfe2Jlu5bLOewZdY1wOa_2w8g$ )
-## There are many ways/solvers to do this, but I just sticked with the very basic. Send me if you found much better solutions!
+## There are many ways/solvers to do this, but I just sticked with the very basic.
 
 # use the tuned values
 alpha <- res$par
@@ -393,7 +389,7 @@ forecast_error_holt <- dm$demand[101:300] - forecast_1_500[101:300]
 hist(forecast_error_holt)
 safety_stock <- quantile(forecast_error_holt, 0.80)
 
-stocking_301_500 <- forecast_1_500[301:500] + safety_stock # we use safety_stock obtained from df2
+stocking_301_500 <- forecast_1_500[301:500] + safety_stock # I use safety_stock obtained from df2
 
 stocking_301_500[1] #stocking quantity at Week301 is 3735.754
 
@@ -459,7 +455,7 @@ AveProf_holt_smoothing <- function(p, price, salvage, cost) {
   stocking_101_300 <- forecast_1_500[101:300] + safety_stock
   # Average profit
   AvgProf <- mean(price * pmin(stocking_101_300, dm$demand[101:300]) + salvage * pmax(stocking_101_300 - dm$demand[101:300], 0) - cost * stocking_101_300)
-
+  
   print(-AvgProf)
   return(-AvgProf) # don't forget to put negative sign as we want to maximize.
 }
@@ -474,12 +470,7 @@ print("Optimal alpha and beta by maximizing average profit:")
 res$par
 
 
-
-
-
-#6. Use alpha and beta values from Question 5, and repeat Question 4.
-
-# use the tuned values
+#6.  use the tuned values
 alpha <- res$par[1]
 beta <- res$par[2]
 
@@ -503,7 +494,5 @@ stocking_301_500 <- forecast_1_500_with_optim_alpha[301:500] + safety_stock # we
 
 # Average profit
 res_table$AvgProf[6] <- mean(price * pmin(stocking_301_500, dm3$demand) + salvage * pmax(stocking_301_500 - dm3$demand, 0) - cost * stocking_301_500)
-
-
 
 
